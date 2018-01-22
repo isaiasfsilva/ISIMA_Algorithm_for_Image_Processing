@@ -1,3 +1,24 @@
+/*
+
+[2017] Isaias Faria Silva 
+All Rights Reserved.
+ 
+NOTICE: All information contained here in this file is the 
+        property of Isaias Faria Silva
+        If you want to use this, please put the contact 
+        rights information.
+ 
+PURPOSE:Practical activity of Algorithm for images
+		Clermont-Auvergne University - Computer Science Institute
+		ZZ3 - 2018 January 
+
+DESCRIPTION: TP 4 - 
+		This is the main file of this project
+
+Last update: 14 january 2018
+*/
+
+
 ////////////////////////////////////////////////////////////////////////////////
 //                          TP 4 : Filtrage de Diffusion                      //
 ////////////////////////////////////////////////////////////////////////////////

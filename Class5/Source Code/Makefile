@@ -15,8 +15,10 @@
 #DESCRIPTION:
 #		This is Makefile file of this project
 #
-#Last update: 14 january 2018
+#Last update: 22 january 2018
 #*/
+
+
 
 #On purge la liste des suffixes utilis� pour les r�les implicites
 .SUFFIXES:
@@ -25,7 +27,7 @@
 .SUFFIXES:.cpp .o
 
 #Nom de l'executable
-EXEC=tp4
+EXEC=tp6
 
 #Liste des fichiers sources separes par des espaces
 SOURCES=main.cpp
