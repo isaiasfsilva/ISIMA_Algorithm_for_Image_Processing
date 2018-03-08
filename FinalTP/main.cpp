@@ -99,7 +99,15 @@ void InitLevelSet(CImg<float>* imgIn, int x0,int y0, int r)
 {
  cimg_forXY(*imgIn,x,y)
  {
-  (*imgIn)(x,y) = sqrt((x-x0)*(x-x0)+(y-y0)*(y-y0))-r;
+   float buff = sqrt((x-x0)*(x-x0)+(y-y0)*(y-y0))-r;
+   if(buff>0){
+   	(*imgIn)(x,y) = -10000;
+   }else if(buff<0){
+   	(*imgIn)(x,y) = 10000;
+   }else{
+   	 (*imgIn)(x,y) = 0;
+   }
+
  }
 }
 
@@ -152,12 +160,12 @@ void Propagate(CImg<float> imgIn, CImg<float>* LevelSet){
 	float r_     = 117.588;
 	float g_     = 79.064;
 	float lamb_1 = 5;	
-	float lamb_2 = 1;
+	float lamb_2 = 15;
 	float mi     = 1;
 	float v      = 0;
 
 	int   nbiter = 1000;
-	int IterStop = 2;
+	int IterStop = 10;
 
 	
 
@@ -168,7 +176,7 @@ void Propagate(CImg<float> imgIn, CImg<float>* LevelSet){
 		float buffer=0.0;
 		cimg_forXY((*LevelSet),x,y){
 			if((*LevelSet)(x,y)<0.0){
-				buffer+=(*LevelSet)(x,y);
+				buffer+=I(x,y);
 				nb++;
 			}
 		}
@@ -191,19 +199,17 @@ void Propagate(CImg<float> imgIn, CImg<float>* LevelSet){
 
 
 		cimg_forXY((*LevelSet),x,y){
-			////// DELETE AFTER ///////
 			
-			float DIV = Dxx(x,y)*Dy(x,y)*Dy(x,y) - 2*Dx(x,y)*Dy(x,y)*Dxy(x,y) + Dyy(x,y)*Dx(x,y)*Dx(x,y);
-			DIV /= pow(Dx(x,y)*Dx(x,y) + Dy(x,y)*Dy(x,y), 1.5);
-			///////////////////////////
+			float DIV   = Dxx(x,y)*Dy(x,y)*Dy(x,y) - 2*Dx(x,y)*Dy(x,y)*Dxy(x,y) + Dyy(x,y)*Dx(x,y)*Dx(x,y);
+			DIV        /= pow(Dx(x,y)*Dx(x,y) + Dy(x,y)*Dy(x,y), 1.5) + 0.0001;
 
-
-			float buff = mi*DIV;
-			buff -= v;
-			buff -= lamb_1*( pow(r_-r(x,y),2) + pow(g_-g(x,y),2));
-			buff += lamb_2 * pow(I(x,y) - c,2);
+			float buff  = mi*DIV;
+			buff       -= v;
+			buff       -= lamb_1*( pow(r_-r(x,y),2) + pow(g_-g(x,y),2));
+			buff       += lamb_2 * pow(I(x,y) - c,2);
 
 			(*LevelSet)(x,y) = (*LevelSet)(x,y) + buff;
+
 		}
 
 		if(!(it % IterStop)){
