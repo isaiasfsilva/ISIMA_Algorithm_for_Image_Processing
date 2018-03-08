@@ -137,40 +137,80 @@ void Propagate(CImg<float> imgIn, CImg<float>* LevelSet){
  }
 
 
- 	
+	imgDraw = imgIn;
+	CImg<float> Contour = ExtractContour(*LevelSet);
+	DrawContour(&imgDraw, Contour);
+	CImgDisplay dispTemp(imgDraw,"Before everything");
+
+	while (!dispTemp.is_closed()){
+		dispTemp.wait();
+	}
+
+
 
 	//fixed parameters
 	float r_     = 117.588;
 	float g_     = 79.064;
 	float lamb_1 = 5;	
-	float lamb_2 = 5;
+	float lamb_2 = 1;
 	float mi     = 1;
 	float v      = 0;
 
 	int   nbiter = 1000;
-	int IterStop = 100;
+	int IterStop = 2;
+
+	
 
 	for(int it = 0; it < nbiter ; ++it){
-		float c=0.0;
+		
+		//Calc of the constant C
+		int nb      =0;
+		float buffer=0.0;
+		cimg_forXY((*LevelSet),x,y){
+			if((*LevelSet)(x,y)<0.0){
+				buffer+=(*LevelSet)(x,y);
+				nb++;
+			}
+		}
+
+		float c = buffer/nb;
+		// end of C
+
+			CImgList<> G_forw = (*LevelSet).get_gradient("xy",0);
+			
+			CImg<> Dx = G_forw[0];
+	  		CImg<> Dy = G_forw[1];
+
+	  		G_forw = Dx.get_gradient("xy",0);
+	  		CImg<> Dxx = G_forw[0];
+	  		CImg<> Dxy = G_forw[1];
+
+	  		G_forw = Dy.get_gradient("xy",0);
+	  		CImg<> Dyy = G_forw[1];
+
+
 
 		cimg_forXY((*LevelSet),x,y){
 			////// DELETE AFTER ///////
-			float DIV=0;
+			
+			float DIV = Dxx(x,y)*Dy(x,y)*Dy(x,y) - 2*Dx(x,y)*Dy(x,y)*Dxy(x,y) + Dyy(x,y)*Dx(x,y)*Dx(x,y);
+			DIV /= pow(Dx(x,y)*Dx(x,y) + Dy(x,y)*Dy(x,y), 1.5);
 			///////////////////////////
 
 
+			float buff = mi*DIV;
+			buff -= v;
+			buff -= lamb_1*( pow(r_-r(x,y),2) + pow(g_-g(x,y),2));
+			buff += lamb_2 * pow(I(x,y) - c,2);
 
-			(*LevelSet)(x,y) += mi*DIV;
-			(*LevelSet)(x,y) -= v;
-			(*LevelSet)(x,y) -= lamb_1*( pow(r_-r(x,y),2) + pow(g_-g(x,y),2));
-			(*LevelSet)(x,y) += lamb_2 * pow(I(x,y) - c,2);
+			(*LevelSet)(x,y) = (*LevelSet)(x,y) + buff;
 		}
 
 		if(!(it % IterStop)){
 			imgDraw = imgIn;
 			CImg<float> Contour = ExtractContour(*LevelSet);
 			DrawContour(&imgDraw, Contour);
-			CImgDisplay dispTemp(imgDraw,"Segment Image");
+			CImgDisplay dispTemp(imgDraw,"Segment Image"+it);
 
 			while (!dispTemp.is_closed()){
 				dispTemp.wait();
