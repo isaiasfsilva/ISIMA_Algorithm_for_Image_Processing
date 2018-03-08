@@ -99,14 +99,8 @@ void InitLevelSet(CImg<float>* imgIn, int x0,int y0, int r)
 {
  cimg_forXY(*imgIn,x,y)
  {
-   float buff = sqrt((x-x0)*(x-x0)+(y-y0)*(y-y0))-r;
-   if(buff>0){
-   	(*imgIn)(x,y) = -10000;
-   }else if(buff<0){
-   	(*imgIn)(x,y) = 10000;
-   }else{
-   	 (*imgIn)(x,y) = 0;
-   }
+   float buff = r - sqrt((x-x0)*(x-x0)+(y-y0)*(y-y0));
+   
 
  }
 }
@@ -129,6 +123,9 @@ void Propagate(CImg<float> imgIn, CImg<float>* LevelSet){
  I.resize(imgIn.width(),imgIn.height());
 
  cimg_forXY((imgIn),x,y){
+   if(imgIn(x,y,0,0) == imgIn(x,y,0,1) == imgIn(x,y,0,2) == 0){
+   	 r(x,y) =  g(x,y) = 0.0;
+   }
    //Calc of r
    // r = R / (R+G+B)
    r(x,y) = imgIn(x,y,0,0) / (imgIn(x,y,0,0) + imgIn(x,y,0,1) + imgIn(x,y,0,2));
@@ -159,6 +156,7 @@ void Propagate(CImg<float> imgIn, CImg<float>* LevelSet){
 	//fixed parameters
 	float r_     = 117.588;
 	float g_     = 79.064;
+	float delta_t = 1;
 	float lamb_1 = 5;	
 	float lamb_2 = 15;
 	float mi     = 1;
@@ -181,7 +179,11 @@ void Propagate(CImg<float> imgIn, CImg<float>* LevelSet){
 			}
 		}
 
-		float c = buffer/nb;
+		float c;
+		if(nb)
+			c = buffer/nb;
+		else
+			c = 0.0;
 		// end of C
 
 			CImgList<> G_forw = (*LevelSet).get_gradient("xy",0);
@@ -208,7 +210,7 @@ void Propagate(CImg<float> imgIn, CImg<float>* LevelSet){
 			buff       -= lamb_1*( pow(r_-r(x,y),2) + pow(g_-g(x,y),2));
 			buff       += lamb_2 * pow(I(x,y) - c,2);
 
-			(*LevelSet)(x,y) = (*LevelSet)(x,y) + buff;
+			(*LevelSet)(x,y) = (*LevelSet)(x,y) + delta_t * buff;
 
 		}
 
