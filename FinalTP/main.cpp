@@ -43,7 +43,7 @@ Log activity:
 #include "CImg.h"
 #include <iostream>
 #include <cmath>
-
+#include <unistd.h>
 #define MAX(a,b) (((a)<(b)) ? (b) : (a) )
 #define MIN(a,b) (((a)<(b)) ? (a) : (b) )
 
@@ -99,14 +99,7 @@ void InitLevelSet(CImg<float>* imgIn, int x0,int y0, int r)
 {
  cimg_forXY(*imgIn,x,y)
  {
-   float buff = sqrt((x-x0)*(x-x0)+(y-y0)*(y-y0))-r;
-   if(buff>0){
-   	(*imgIn)(x,y) = -10000;
-   }else if(buff<0){
-   	(*imgIn)(x,y) = 10000;
-   }else{
-   	 (*imgIn)(x,y) = 0;
-   }
+   (*imgIn)(x,y) = r - sqrt((x-x0)*(x-x0)+(y-y0)*(y-y0));
 
  }
 }
@@ -129,13 +122,19 @@ void Propagate(CImg<float> imgIn, CImg<float>* LevelSet){
  I.resize(imgIn.width(),imgIn.height());
 
  cimg_forXY((imgIn),x,y){
-   //Calc of r
-   // r = R / (R+G+B)
-   r(x,y) = imgIn(x,y,0,0) / (imgIn(x,y,0,0) + imgIn(x,y,0,1) + imgIn(x,y,0,2));
 
-   //Calc of g
-   // g = G / (R+G+B)
-   g(x,y) = imgIn(x,y,0,1) / (imgIn(x,y,0,0) + imgIn(x,y,0,1) + imgIn(x,y,0,2));
+ 	if(imgIn(x,y,0,0) == imgIn(x,y,0,1) == imgIn(x,y,0,2) == 0){
+   	 	r(x,y) =  g(x,y) = 0.0;
+   }else{
+	   //Calc of r
+	   // r = R / (R+G+B)
+	   r(x,y) = imgIn(x,y,0,0) / (imgIn(x,y,0,0) + imgIn(x,y,0,1) + imgIn(x,y,0,2)+1);
+
+	   //Calc of g
+	   // g = G / (R+G+B)
+	   g(x,y) = imgIn(x,y,0,1) / (imgIn(x,y,0,0) + imgIn(x,y,0,1) + imgIn(x,y,0,2) +1);
+   }
+
 
 
    //Calc of I
@@ -150,23 +149,27 @@ void Propagate(CImg<float> imgIn, CImg<float>* LevelSet){
 	DrawContour(&imgDraw, Contour);
 	CImgDisplay dispTemp(imgDraw,"Before everything");
 
-	while (!dispTemp.is_closed()){
-		dispTemp.wait();
-	}
+	usleep(1000000);
+dispTemp.close();
 
+//DEV MODE
+
+	const char* temp_dev = getenv("TP_IMG_LAMBDA");
 
 
 	//fixed parameters
 	float r_     = 117.588;
 	float g_     = 79.064;
-	float lamb_1 = 5;	
-	float lamb_2 = 15;
-	float mi     = 1;
+	float lamb_1 = strtod(temp_dev,NULL);;	
+
+
+	float lamb_2 = 0;
+	float mi     = 0;
 	float v      = 0;
 
 	int   nbiter = 1000;
-	int IterStop = 10;
-
+	int IterStop = 1;
+	float speed  = 1.5;
 	
 
 	for(int it = 0; it < nbiter ; ++it){
@@ -180,8 +183,9 @@ void Propagate(CImg<float> imgIn, CImg<float>* LevelSet){
 				nb++;
 			}
 		}
-
-		float c = buffer/nb;
+		float c = 0;
+		if(nb!=0)
+			c = buffer/nb;
 		// end of C
 
 			CImgList<> G_forw = (*LevelSet).get_gradient("xy",0);
@@ -208,7 +212,7 @@ void Propagate(CImg<float> imgIn, CImg<float>* LevelSet){
 			buff       -= lamb_1*( pow(r_-r(x,y),2) + pow(g_-g(x,y),2));
 			buff       += lamb_2 * pow(I(x,y) - c,2);
 
-			(*LevelSet)(x,y) = (*LevelSet)(x,y) + buff;
+			(*LevelSet)(x,y) = (*LevelSet)(x,y) + buff*speed;
 
 		}
 
@@ -217,10 +221,12 @@ void Propagate(CImg<float> imgIn, CImg<float>* LevelSet){
 			CImg<float> Contour = ExtractContour(*LevelSet);
 			DrawContour(&imgDraw, Contour);
 			CImgDisplay dispTemp(imgDraw,"Segment Image"+it);
-
-			while (!dispTemp.is_closed()){
-				dispTemp.wait();
-			}
+			usleep(700000);
+			
+			//dispTemp.close();
+			//	while (!dispTemp.is_closed()){
+			//		dispTemp.wait();
+			//}
 		}
 
 
@@ -321,11 +327,10 @@ int main(int argc, char *argv[]){
  CImg<float> img = CImg<float>("./Images/tests/1.bmp");
 
 
-
  // Définition d'un contour initial circulaire
  int x0 = img.width()/2;
  int y0 = img.height()/2;
- int r  = img.height()/4;
+ int r  = img.height()/2;
 
  CImg<float> levelset(img.width(),img.height(),1,1);
  InitLevelSet(&levelset,x0,y0,r);
