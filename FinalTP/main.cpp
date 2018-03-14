@@ -34,6 +34,9 @@ Log activity:
 		...
 
 
+Best lambs:
+	Lambda1 = 0.001
+	Lambdaé = 0.02
 
 */
 
@@ -162,9 +165,12 @@ void Propagate(CImg<float> imgIn, CImg<float>* LevelSet){
 	float g_     = 79.064;
 	float lamb_1 = strtod(temp_dev,NULL); 	
 
-temp_dev = getenv("TP_IMG_LAMBDA2");
+	temp_dev = getenv("TP_IMG_LAMBDA2");
 	float lamb_2 =  strtod(temp_dev,NULL); 	
-	float mi     = 0;
+
+	temp_dev = getenv("TP_IMG_MI");
+	float mi =  strtod(temp_dev,NULL); 	
+	
 	float v      = 0;
 
 	int   nbiter = 10000;
@@ -322,9 +328,13 @@ temp_dev = getenv("TP_IMG_LAMBDA2");
 *******************************************************************************/
 int main(int argc, char *argv[]){
 
- 
+ if(argc!=2){
+ 	std::cout << "Input file error. The picture path must be informed as the first input" << std::endl;
+ 	exit(0);
+ }
+
  // Opening file
- CImg<float> img = CImg<float>("./Images/tests/1.bmp");
+ CImg<float> img = CImg<float>(argv[1]);
 
 
  // Définition d'un contour initial circulaire
