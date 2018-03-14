@@ -36,7 +36,8 @@ Log activity:
 
 Best lambs:
 	Lambda1 = 0.001
-	Lambdaé = 0.02
+	Lambda2 = 0.02
+	Mi      = 0.0005
 
 */
 
