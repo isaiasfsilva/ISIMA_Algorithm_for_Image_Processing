@@ -150,25 +150,25 @@ void Propagate(CImg<float> imgIn, CImg<float>* LevelSet){
 	CImgDisplay dispTemp(imgDraw,"Before everything");
 
 	usleep(1000000);
-dispTemp.close();
+	dispTemp.close();
 
 //DEV MODE
 
-	const char* temp_dev = getenv("TP_IMG_LAMBDA");
+	const char* temp_dev = getenv("TP_IMG_LAMBDA1");
 
 
 	//fixed parameters
 	float r_     = 117.588;
 	float g_     = 79.064;
-	float lamb_1 = strtod(temp_dev,NULL);;	
+	float lamb_1 = strtod(temp_dev,NULL); 	
 
-
-	float lamb_2 = 0;
+temp_dev = getenv("TP_IMG_LAMBDA2");
+	float lamb_2 =  strtod(temp_dev,NULL); 	
 	float mi     = 0;
 	float v      = 0;
 
-	int   nbiter = 1000;
-	int IterStop = 1;
+	int   nbiter = 10000;
+	int IterStop = 100;
 	float speed  = 1.5;
 	
 
@@ -330,7 +330,7 @@ int main(int argc, char *argv[]){
  // Définition d'un contour initial circulaire
  int x0 = img.width()/2;
  int y0 = img.height()/2;
- int r  = img.height()/2;
+ int r  = img.width()/2;
 
  CImg<float> levelset(img.width(),img.height(),1,1);
  InitLevelSet(&levelset,x0,y0,r);
