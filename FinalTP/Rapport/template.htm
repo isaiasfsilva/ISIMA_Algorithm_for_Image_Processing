@@ -25,53 +25,92 @@
 <h3>FARIA SILVA Isaias, METZKER SOARES Paula, Promo 18 - F4</h3>
 <h1 class="titrearticle"> Présentation du sujet </h1>
 
-Dans le cadre du travail final du cours d'Algorithmes pour le Traitement d'Images, on s'intéresse au sujet de Contour Active Implicite, une technique de segmentation d'une région de l'image. En conséquence, inspiré de l'article [CHANG, Data], on souhaite mettre en place un programme d'identification de visages selon la coloration de la peau représentée par un modèle de coloration en échelle RGB. Pour être en accord aux pratiques effectuées au cours des classes, on utilise la bibliothèque CImg pour le traitement des images. On vise à mesurer la performance de du logiciel mis en place pour identifier le visage. Par ailleurs, on cible l'identification des limites de la méthode aussi bien que leur performance pour identifier d'autres objets dont la coloration soit la couleur de la peau. Des expérimentations sur des images réelles sont présentées ainsi bien que des images artificielles pour répondre aux problématiques et conjonctures établies.  <br>
+Dans le cadre du travail final du cours d'Algorithmes pour le Traitement d'Images, on s'intéresse au sujet de Contour Active, une technique de segmentation d'une région de l'image. En conséquence, inspiré de l'article [CHANG, Data], on souhaite mettre en place un programme d'identification de visages selon la coloration de la peau représentée par un modèle de coloration en échelle RGB. Pour être en accord aux pratiques effectuées au cours des classes, on utilise la bibliothèque CImg pour le traitement des images. On vise à mesurer la performance de du logiciel mis en place pour identifier le visage. Par ailleurs, on cible l'identification des limites de la méthode aussi bien que leur performance pour identifier d'autres objets dont la coloration soit la couleur de la peau. Des expérimentations sur des images réelles sont présentées ainsi bien que des images artificielles pour répondre aux problématiques et conjonctures établies.  <br>
 
 <h1 class="titrearticle"> Méthode</h1>
 
  
 <h2 class="soustitrearticle"> Partie théorique</h2>
 
-La détection du visage est une tâche de plus en plus important pour les applications qui concerne le traitement d'image, en spécial pour le traitement de visage dont cette procédure est la prémiere étape d'une reconnaissance automatique du visage en général. Une technique efficace et pratique de mettre en place pour l'identification des bornes de l'objet à suivre est le modèle derformable aussi connu comme modèle de contour active. 
+La détection du visage est une tâche de plus en plus importante pour les applications qui concerne le traitement d'images, en spécial pour le traitement de visage dont cette procédure est la première étape d'une reconnaissance automatique du visage en général. Traditionnellement, le gradient d'une image fournit des contours très précis et est donc une des techniques les plus simples pour la détection d'objets d'une image à partir des contours obtenus. Cependant, le visage humain a une particularité face à des objets en général puisqu'il est décrit pour un modèle unique sous l'échelle RGB. On cherche donc à maximiser la performance et la précision de l'identification du visage face à cette caractéristique particulière. Alors, on se tient à l'identification des bornes de l'objet à partir des frontières entre la région faciale et les autres régions de l'image. Pour cela, on met en place le modèle déformable aussi connu comme modèle de contour actif. 
+
+Un contour actif est une courbe qui évolue à partir de sa forme initiale vers une forme la plus proche du contour de l'objet d'intérêt sous l'action de la force d'énergie sur cette courbe. Le modèle de contour active mis en place et appelé "Snakes" cherche à minimiser la fonction d'énergie dans la courbe modélisant l'objet d'intérêt. Ce modèle a été introduit par [KASS,1988]. On reprend les notations présentées par [CHANG, Data], puisque c'est l'article de référence pour l'implémentation proposée. On définit donc une image paramétrée par I(x,y) une valeur réelle à partir des coordonnées cartésiennes bidimensionnelles. La courbe de contour sera donc paramétrée comme C(p) = {x(p), y(p)}, où p est un paramètre arbitraire. À partir de l'équation d'énergie proposée par [KASS,1988], on peut écrire l'énergie du contour active comme: 
+
+<br>
+
+<a href="https://www.codecogs.com/eqnedit.php?latex=E&space;=&space;\alpha&space;\int_{0}^{1}&space;|C'(p)|^2&space;dp&space;&plus;&space;\beta&space;\int_{0}^{1}&space;|C''(p)|^2&space;dp-&space;\lambda&space;\int_{0}^{1}&space;|\bigtriangledown&space;I(x(p),y(p))&space;|^2&space;dp" target="_blank"><img src="https://latex.codecogs.com/gif.latex?E&space;=&space;\alpha&space;\int_{0}^{1}&space;|C'(p)|^2&space;dp&space;&plus;&space;\beta&space;\int_{0}^{1}&space;|C''(p)|^2&space;dp-&space;\lambda&space;\int_{0}^{1}&space;|\bigtriangledown&space;I(x(p),y(p))&space;|^2&space;dp" title="E = \alpha \int_{0}^{1} |C'(p)|^2 dp + \beta \int_{0}^{1} |C''(p)|^2 dp- \lambda \int_{0}^{1} |\bigtriangledown I(x(p),y(p)) |^2 dp" /></a>
+
+<br>
+où <a href="https://www.codecogs.com/eqnedit.php?latex=\alpha&space;,\beta&space;et&space;\lambda" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\alpha&space;,\beta&space;et&space;\lambda" title="\alpha ,\beta et \lambda" /></a> sont des constantes positives. Les deux premières constantes une contrainte interne au contour. Ce sont des termes de régularisation du contour qui déterminent son élasticité et sa rigidité. Alors, la minimisation de ces termes rend le contour plus précis et propre. D'autre part, la dernière constante est le terme de liaison aux données. Elle dirige le contour vers les zones de plus forts gradients de l'image et donc les régions plus probables d'être des contours. Sa minimisation est donc un détecteur de frontières. En effet, l'énergie est représenté implicitement en ligne de niveaux puisque la courbe évolue au cours des itérations. On dit que <a href="https://www.codecogs.com/eqnedit.php?latex=\phi" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\phi" title="\phi" /></a> est la fonction de ligne de niveaux tel que <a href="https://www.codecogs.com/eqnedit.php?latex=\phi&space;(x,y):&space;R^2&space;\rightarrow&space;R" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\phi&space;(x,y):&space;R^2&space;\rightarrow&space;R" title="\phi (x,y): R^2 \rightarrow R" /></a> représente la courbe C selon le référentiel suivant: <a href="https://www.codecogs.com/eqnedit.php?latex=C&space;=&space;{(x,y):&space;\phi&space;(x,y)&space;=&space;0}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?C&space;=&space;{(x,y):&space;\phi&space;(x,y)&space;=&space;0}" title="C = {(x,y): \phi (x,y) = 0}" /></a> de façon que la courbe est interprétée dans la direction normale à partir d'une vitesse imposée par la force d'énergie. Il revient donc à résoudre l'équation différentielle suivante:
+<br>
+<a href="https://www.codecogs.com/eqnedit.php?latex=\frac{\partial&space;\phi}{\partial&space;t}&space;=&space;|\bigtriangledown&space;\phi|F,&space;\phi(0,x,y)&space;=&space;\phi&space;_0&space;(x,y)" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\frac{\partial&space;\phi}{\partial&space;t}&space;=&space;|\bigtriangledown&space;\phi|F,&space;\phi(0,x,y)&space;=&space;\phi&space;_0&space;(x,y)" title="\frac{\partial \phi}{\partial t} = |\bigtriangledown \phi|F, \phi(0,x,y) = \phi _0 (x,y)" /></a>
+<br>
+
+où <a href="https://www.codecogs.com/eqnedit.php?latex=\phi&space;_0&space;(x,y)" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\phi&space;_0&space;(x,y)" title="\phi _0 (x,y)" /></a> définit le contour initial.
+
+Selon [CHANG, Data] cette formulation permet d'implémenter l'évolution de la courbe dans les coordonnées bidimensionnelles initiales. De plus, la convergence de la ligne de niveaux est obtenue à partir des contraintes dérivées de l'image. On identifie donc les frontières de contour par le contour active. À partir de ce modèle, la ligne de niveaux sous-contrainte du gradient est modélisée comme:
+<br>
+<a href="https://www.codecogs.com/eqnedit.php?latex=\frac{\partial&space;\phi}{\partial&space;t}&space;=&space;g(|\bigtriangledown&space;I|)|\bigtriangledown&space;\phi|&space;F" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\frac{\partial&space;\phi}{\partial&space;t}&space;=&space;g(|\bigtriangledown&space;I|)|\bigtriangledown&space;\phi|&space;F" title="\frac{\partial \phi}{\partial t} = g(|\bigtriangledown I|)|\bigtriangledown \phi| F" /></a>
+<br>
 
 
-<!--> Présentation de la méthode utilisée et référence aux travaux connexes (cf. biblio article)<br><!-->
+
+
+
+
+
+
+<!-- Eu esqueci a palavra que o prof usa para dizer que o contorno fica mais certinho -->
+
+
+<!-- Présentation de la méthode utilisée et référence aux travaux connexes (cf. biblio article)<br> -->
 
 <br>
 
 <h2 class="soustitrearticle"> Implémentation</h2>
-
+<!--
 Détails de l'implémentation (sous CImg)
+-->
+
 <h1 class="titrearticle"> Résultats</h1>
 
 <h2 class="soustitrearticle"> Validation sur données de synthèse</h2>
-<!-->
+<!--
 Vous devez créer des données de synthèse pour évaluer votre méthode
-<!-->
+-->
 <br>
 
 <h2 class="soustitrearticle"> Données réelles</h2>
-<!-->
+<!--
 Une fois la méthode évaluée, vous appliquerez votre méthode sur des images réelles
-<!-->
+-->
 <br>
 
 <h1 class="titrearticle"> Discussion</h1>
-<!-->
+<!--
 Commentez vos résultats (d'un point de vue qualitatif <span style="font-weight: bold;">ET</span> quantitatif)
-<!-->
+-->
 
 
-Limites : * La reconnaissance requiert la bonne initialization des paramètres aussi bien que le bon positionnement du contour initial.
+Limites : <br>
+
+Cette approche est limitée par plusieurs inconvénients.
+
+ * La reconnaissance requiert la bonne initialization des paramètres aussi bien que le bon positionnement du contour initial. C'est-àire que l'énergie est dépendante de la paramétrisation du contour.
 <br>
+* La convergence est obtenue seulement par des frontières non-concaves de l'objet d'intêrét quand la contrainte de régularité est très significante par ce modèle. Alors le résultat sera soit la divergence du calcul ou une très élévée perturbation des résultats.
+<br>
+* La contrainte de rigidité entraîne des perturbations du calcul.
 
 
 <h1 class="titrearticle"> Références</h1>
 
-[CHANG, Data] Jae-Sik Chang1, Mu-Youl Lee1 , Chae-Hyun Moon1, Hye-Sun Park1, Kyung-Mi Lee2, Hang-Joon Kim. "Face detection using active contours". <br><br>
+[CHANG, Data] Jae-Sik Chang1, Mu-Youl Lee1 , Chae-Hyun Moon1, Hye-Sun Park1, Kyung-Mi Lee2, Hang-Joon Kim. "Face detection using active contours"  <br>
 
-[VATSA,2003] Mayank Vatsa, Richa Singh, P. Gupta. "Face detection using gradient vector flow"
+[KASS,1988] M. Michael Kass, Andrew Witkin, Demetri Terzopoulos. "Snakes : Active contour models". International Journal of Computer Vision, 1 :321?332, 1988 <br>
 
+[GASTAUD, 2005] Muriel Gastaud. "Modèles de contours actifs pour la segmentation d’images et de vidéos". Automatique
+/ Robotique. Université Nice Sophia Antipolis, 2005. <br>
 
 
 </body>
