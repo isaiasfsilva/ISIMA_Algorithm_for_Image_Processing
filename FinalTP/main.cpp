@@ -4,7 +4,7 @@
 
 
 /*
-[2017] Isaias Faria Silva and Paula Metzker Soares
+[2018] Isaias Faria Silva and Paula Metzker Soares
 All Rights Reserved.
  
 NOTICE: All information contained here in this file is the 
@@ -19,12 +19,12 @@ DESCRIPTION:
 		This is the main file of this project
 This code is also available on GitHub
 	Link: https://goo.gl/qTDxar
-Last update: 26th February 2017
+Last update: 26th February 2018
 Log activity:
 	- 26/Feb/2018
 		Calcul of Level Sets (r, g and I variables)
 		...
-Best lambs:
+Best coefficients:
 	Lambda1 = 0.001
 	Lambda2 = 0.02
 	Mi      = 0.0005
@@ -137,22 +137,14 @@ void Propagate(CImg<float> imgIn, CImg<float>* LevelSet){
 	usleep(1000000);
 	dispTemp.close();
 
-//DEV MODE
-
-	const char* temp_dev = getenv("TP_IMG_LAMBDA1");
 
 
 	//fixed parameters
 	float r_     = 117.588;
 	float g_     = 79.064;
-	float lamb_1 = strtod(temp_dev,NULL); 	
-
-	temp_dev = getenv("TP_IMG_LAMBDA2");
-	float lamb_2 =  strtod(temp_dev,NULL); 	
-
-	temp_dev = getenv("TP_IMG_MI");
-	float mi =  strtod(temp_dev,NULL); 	
-	
+	float lamb_1 = 0.1; 	
+	float lamb_2 =  0.4; 	
+	float mi =  0.5; 		
 	float v      = 0;
 
 	int   nbiter = 10000;
@@ -209,82 +201,10 @@ void Propagate(CImg<float> imgIn, CImg<float>* LevelSet){
 			CImg<float> Contour = ExtractContour(*LevelSet);
 			DrawContour(&imgDraw, Contour);
 			CImgDisplay dispTemp(imgDraw,"Segment Image"+it);
-			//usleep(700000);
+			usleep(700000);
 			
-			//dispTemp.close();
-				while (!dispTemp.is_closed()){
-					dispTemp.wait();
-			}
 		}
-
-
 	}
- 	
-
-
-
-/*
- int   nbiter  = 100;   // Nombre d'itération
- float delta_t = 1.5;      // Pas temporel delta t  == courbe doit etre dedans de lobjet sinon la courbe diverge
- float alpha   = 0.05;  
- float beta    = 0.8;    // Pondération du terme d'advection
- float ballon  = 0; //-0.01;  // Force ballon == vitesse constant qui force la convergence
- CImgList<> ImgInGrad = imgIn.get_gradient("xy",4);
- CImg<> imgDraw = imgIn;
- int IterStop = 100;
- 
- CImg<> g_Grad(imgIn.width(),imgIn.height(),1,1,0);
- 
- cimg_forXY(g_Grad,x,y){
-	 g_Grad(x,y) = -1.0/(1.0 + ImgInGrad[0](x,y)*ImgInGrad[0](x,y) + ImgInGrad[1](x,y)*ImgInGrad[1](x,y));
-	}
-	
-	CImgList<> d_g = g_Grad.get_gradient("xy",4);
-	
-	CImgDisplay dispG(imgDraw,"Energie du contour");
-	 while (!dispG.is_closed())
-	 {
-	  dispG.wait();
-	 }
- 
-  for(int it = 0; it < nbiter ; ++it){
-	  
-	 CImgList<> G_back = (*LevelSet).get_gradient("xy",-1);
-	 CImgList<> G_forw = (*LevelSet).get_gradient("xy",1);
-	  
-	  CImg<> Dpx = G_forw[0];
-	  CImg<> Dnx = G_back[0];
-	  CImg<> Dpy = G_forw[1];
-	  CImg<> Dny = G_back[1];
-	  	  
-  cimg_forXY((*LevelSet),x,y)
-  {
-	  float dp = sqrt((MAX(0.0,Dnx(x,y)))*(MAX(0.0,Dnx(x,y)))+(MIN(0.0, Dpx(x,y)))*(MIN(0.0, Dpx(x,y))) + (MAX(0.0,Dny(x,y)))*(MAX(0.0,Dny(x,y)))+(MIN(0.0, Dpy(x,y)))*(MIN(0.0, Dpy(x,y))) );
-	  float dn = sqrt((MAX(0.0,Dpx(x,y)))*(MAX(0.0,Dpx(x,y)))+(MIN(0.0, Dnx(x,y)))*(MIN(0.0, Dnx(x,y))) + (MAX(0.0,Dpy(x,y)))*(MAX(0.0,Dpy(x,y)))+(MIN(0.0, Dny(x,y)))*(MIN(0.0, Dny(x,y))) );
-	  
-	  float u = d_g[0](x,y);
-	  float v = d_g[1](x,y);
-	  
-	  float Fprop = MAX(0.0,g_Grad(x,y)) * dp + MIN(0.0,g_Grad(x,y)) * dn;
-	  float Fadv = MAX(0.0,u)* Dnx(x,y) + MIN(0.0,u)* Dpx(x,y) + MAX(0.0,v)* Dny(x,y) + MIN(0.0,v)* Dpy(x,y);
-	  
-	  float speed = alpha*Fprop + beta*Fadv;
-	 (*LevelSet)(x,y) = (*LevelSet)(x,y) - delta_t*speed;
-  }
-  
-  if(!(it % IterStop)){
-	  imgDraw = imgIn;
-	  CImg<float> Contour = ExtractContour(*LevelSet);
-	  DrawContour(&imgDraw, Contour);
-	  CImgDisplay dispTemp(imgDraw,"Image Segmentée");
-	 while (!dispTemp.is_closed())
-	 {
-	  dispTemp.wait();
-	 }
-	}	 
- }*/
-
-
 }
 
 /*******************************************************************************
@@ -292,13 +212,13 @@ void Propagate(CImg<float> imgIn, CImg<float>* LevelSet){
 *******************************************************************************/
 int main(int argc, char *argv[]){
 
-
  if(argc!=2){
-		std::cout << "Input file error. The picture path must be informed as the first input" << std::endl;
-		exit(0);
-	}
-	// Opening file
-	CImg<float> img = CImg<float>(argv[1]);
+ 	std::cout << "Input file error. The picture path must be informed as the first input" << std::endl;
+ 	exit(0);
+ }
+
+ // Opening file
+ CImg<float> img = CImg<float>(argv[1]);
 
 
  // Définition d'un contour initial circulaire
