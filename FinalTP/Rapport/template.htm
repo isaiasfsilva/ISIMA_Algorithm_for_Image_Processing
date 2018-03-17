@@ -93,9 +93,79 @@ où <a href="https://www.codecogs.com/eqnedit.php?latex=div(\bigtriangledown&spa
 <br>
 
 <h2 class="soustitrearticle"> Implémentation</h2>
-<!--
-Détails de l'implémentation (sous CImg)
--->
+<p>La mise en oeuvre de ce travail a &eacute;t&eacute; fait dans la machine <strong>Berzet&nbsp;</strong>en utilisant le biblioth&egrave;que <strong>CImg&nbsp;</strong>qu&#39;a &eacute;t&eacute; propos&eacute;e par l&#39;enseignant &nbsp;pendant le cours d&#39;Algorithms for Image Processing dans le cadre d&#39;Ing&eacute;nieur Informatique de l&#39;ISIMA. &nbsp;Ce projet est &eacute;galement disponible dans le GitHub &nbsp;(<a href="https://goo.gl/qTDxar" rel="noopener noreferrer" target="_blank">https://goo.gl/qTDxar</a> ).</p>
+<hr>
+
+<ol>
+  <li><strong><u>L&#39;structure du projet:</u></strong>
+
+    <ul>
+      <li><span style="color: rgb(184, 49, 47);"><strong>/ &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span style="color: rgb(184, 49, 47);"><strong>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;</strong></span>&nbsp; &nbsp; &nbsp;&nbsp;</strong>&nbsp;</span><span style="color: rgb(124, 112, 107);">//Dossier racine du projet</span>
+
+        <ul>
+          <li><span style="color: rgb(184, 49, 47);"><strong>Images/ &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<span style="color: rgb(184, 49, 47);"><strong>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;</strong></span>&nbsp; &nbsp; &nbsp; &nbsp;</strong><span style="color: rgb(124, 112, 107);">//Dossier avec les images</span></span>
+
+            <ul>
+              <li><span style="color: rgb(184, 49, 47);"><strong>testes/ <span style="color: rgb(184, 49, 47);"><strong>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;</strong></span>&nbsp; &nbsp; &nbsp; &nbsp;&nbsp;</strong>&nbsp; <span style="color: rgb(124, 112, 107);">//Images pour faire les tests</span></span>
+              </li>
+            </ul>
+          </li>
+          <li><strong><span style="color: rgb(184, 49, 47);">output/ &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<span style="color: rgb(184, 49, 47);"><strong>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;</strong></span>&nbsp; &nbsp; &nbsp; &nbsp;&nbsp;</span>&nbsp;</strong><span style="color: rgb(184, 49, 47);">&nbsp;<span style="color: rgb(124, 112, 107);">//Dossier avec les r&eacute;sultats que nous avons obtenu</span></span>
+          </li>
+          <li><span style="color: rgb(184, 49, 47);"><strong>Rapport/ &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;</strong> <span style="color: rgb(124, 112, 107);">//Dossier que contient ce pr&eacute;sent rapport</span></span>
+
+            <ul>
+              <li><span style="color: rgb(41, 105, 176);">template.html &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span style="color: rgb(124, 112, 107);">//Rapport (Il faut l&#39;ouvrir avec un navigateur web)</span></span>
+              </li>
+            </ul>
+          </li>
+          <li><span style="color: rgb(41, 105, 176);">main.cpp<span style="color: rgb(184, 49, 47);"><strong>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp;</strong> <span style="color: rgb(41, 105, 176);"><span style="color: rgb(124, 112, 107);">//Fichier que contient le code du projet</span></span>&nbsp;</span>&nbsp;</span>
+          </li>
+          <li><span style="color: rgb(41, 105, 176);">Makefile &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp;</span></li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li><strong><u>Compilation</u></strong>
+
+    <ul>
+      <li>Pour compiler ce projet il faut seulement ex&eacute;cuter le commande &quot;make&quot; dans le dossier racine du projet. Nous utilisons d&#39;abord la machine berzet.</li>
+    </ul>
+  </li>
+  <li><strong><u>Ex&eacute;cution</u></strong>
+
+    <ul>
+      <li>Pour ex&eacute;cuter ce projet il faut informer l&#39;image dans le premier param&egrave;tre comme dans l&#39;exemple suivant:
+
+        <ul>
+          <li><strong><span style="color: rgb(147, 101, 184);">$</span> ./finalTP <span style="color: rgb(184, 49, 47);">NOME_IMAGE</span></strong></li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li><span style="color: rgb(0, 0, 0);"><u><strong>D&eacute;finitions de base</strong></u></span>
+
+    <ul>
+      <li><span style="color: rgb(184, 49, 47);"><span style="color: rgb(0, 0, 0);">Dans cet projet nous avons fait quelques d&eacute;finitions. La premi&egrave;re est li&eacute;e &agrave; le contour de d&eacute;but. Nous utilisons un circle de rayon &eacute;gale &agrave; taille de l&#39;image divis&eacute;e par 2 et avec le point d&#39;origine dans le centre de l&#39;Image.</span></span>
+      </li>
+      <li>Nous avons chang&eacute; l&#39;initialisation du LevelSet pour &ecirc;tre l&#39;inverse de l&#39;initialization que nous avons fait dans le cours. Cette modification &eacute;tait n&eacute;cessaire parce que toutes les d&eacute;finitions que nous avons utilis&eacute;e sont l&#39;inverse des que sont pr&eacute;sent&eacute;es dans l&#39;artice.</li>
+    </ul>
+  </li>
+  <li><strong><u>Codage</u></strong>
+
+    <ol>
+      <li>D&#39;abord les fonctions <span style="color: rgb(85, 57, 130);"><strong>ExtractContour()</strong></span><span style="color: rgb(0, 0, 0);">,&nbsp;</span><span style="color: rgb(85, 57, 130);"><strong>DrawContour()&nbsp;</strong></span><span style="color: rgb(0, 0, 0);">et</span><span style="color: rgb(85, 57, 130);"><strong>&nbsp;InitLevelSet()&nbsp;</strong></span><span style="color: rgb(0, 0, 0);">sont les m&ecirc;mes que nous avons utilis&eacute; dans le projet. Le travail principal &eacute;tait modifier la fonction de propagation </span><span style="color: rgb(85, 57, 130);"><strong>Propagate()</strong></span><span style="color: rgb(0, 0, 0);">. Dans cette fonction nous d&eacute;finissions quelques parametres pour le mod&egrave;le, nous calculons la constante C d&eacute;finie ci-dessous et nous r&eacute;alisons la propagation du LevelSet.</span></li>
+    </ol>
+  </li>
+</ol>
+<hr>
+
+<p>&nbsp;</p>
+
+<p>
+  <br>
+</p>
+
 
 <h1 class="titrearticle"> Résultats</h1>
 
