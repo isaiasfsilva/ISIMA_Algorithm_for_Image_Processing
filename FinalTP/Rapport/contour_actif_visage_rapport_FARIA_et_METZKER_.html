@@ -1,0 +1,267 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html lang="#LANG">
+<head>
+
+        
+	
+  <title>#Projet d'Imagerie</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=#CHARSET">
+
+	
+  <link rel="stylesheet" href="./style.css" type="text/css">
+
+	
+  <meta name="KeyWords" content="ISIMA, TP, imagerie">
+
+	
+  <meta name="Description" content="compte rendu de projet de TP">
+</head>
+
+  <body>
+<h1>
+  
+  
+  Identification de visage à l'aide du contours active </h1>
+<h3>FARIA SILVA Isaias, METZKER SOARES Paula, Promo 18 - F4</h3>
+<h1 class="titrearticle"> Pr&eacute;sentation du sujet </h1>
+
+Dans le cadre du travail final du cours d'Algorithmes pour le Traitement d'Images, on s'int&eacute;resse au sujet de Contour Active, une technique de segmentation d'une r&eacute;gion de l'image. En cons&eacute;quence, inspir&eacute; de l'article [CHANG], on souhaite mettre en place un programme d'identification de visages selon la coloration de la peau repr&eacute;sent&eacute;e par un mod&egrave;le de coloration en &eacute;chelle RGB. Pour être en accord aux pratiques effectu&eacute;es au cours des classes, on utilise la biblioth&egrave;que CImg pour le traitement des images. On vise à mesurer la performance de du logiciel mis en place pour identifier le visage. Par ailleurs, on cible l'identification des limites de la m&eacute;thode aussi bien que leur performance pour identifier d'autres objets dont la coloration soit la couleur de la peau. Des exp&eacute;rimentations sur des images r&eacute;elles sont pr&eacute;sent&eacute;es ainsi bien que des images artificielles pour r&eacute;pondre aux probl&eacute;matiques et conjonctures &eacute;tablies.  <br>
+
+<h1 class="titrearticle"> M&eacute;thode</h1>
+
+ 
+<h2 class="soustitrearticle"> Partie th&eacute;orique</h2>
+
+La d&eacute;tection du visage est une tâche de plus en plus importante pour les applications qui concerne le traitement d'images, en sp&eacute;cial pour le traitement de visage dont cette proc&eacute;dure est la premi&egrave;re &eacute;tape d'une reconnaissance automatique du visage en g&eacute;n&eacute;ral. Traditionnellement, le gradient d'une image fournit des contours tr&egrave;s pr&eacute;cis et est donc une des techniques les plus simples pour la d&eacute;tection d'objets d'une image à partir des contours obtenus. Cependant, le visage humain a une particularit&eacute; face à des objets en g&eacute;n&eacute;ral puisqu'il est d&eacute;crit pour un mod&egrave;le unique sous l'&eacute;chelle RGB. On cherche donc à maximiser la performance et la pr&eacute;cision de l'identification du visage face à cette caract&eacute;ristique particuli&egrave;re. Alors, on se tient à l'identification des bornes de l'objet à partir des fronti&egrave;res entre la r&eacute;gion faciale et les autres r&eacute;gions de l'image. Pour cela, on met en place le mod&egrave;le d&eacute;formable aussi connu comme mod&egrave;le de contour actif. 
+
+Un contour actif est une courbe qui &eacute;volue à partir de sa forme initiale vers une forme la plus proche du contour de l'objet d'int&eacute;rêt sous l'action de la force d'&eacute;nergie sur cette courbe. Le mod&egrave;le de contour active mis en place et appel&eacute; "Snakes" cherche à minimiser la fonction d'&eacute;nergie dans la courbe mod&eacute;lisant l'objet d'int&eacute;rêt. Ce mod&egrave;le a &eacute;t&eacute; introduit par [KASS,1988]. On reprend les notations pr&eacute;sent&eacute;es par [CHANG], puisque c'est l'article de r&eacute;f&eacute;rence pour l'impl&eacute;mentation propos&eacute;e. On d&eacute;finit donc une image param&eacute;tr&eacute;e par I(x,y) une valeur r&eacute;elle à partir des coordonn&eacute;es cart&eacute;siennes bidimensionnelles. La courbe de contour sera donc param&eacute;tr&eacute;e comme C(p) = {x(p), y(p)}, où p est un param&egrave;tre arbitraire. À partir de l'&eacute;quation d'&eacute;nergie propos&eacute;e par [KASS,1988], on peut &eacute;crire l'&eacute;nergie du contour active comme: 
+
+<br>
+
+<a href="https://www.codecogs.com/eqnedit.php?latex=E&space;=&space;\alpha&space;\int_{0}^{1}&space;|C'(p)|^2&space;dp&space;&plus;&space;\beta&space;\int_{0}^{1}&space;|C''(p)|^2&space;dp-&space;\lambda&space;\int_{0}^{1}&space;|\bigtriangledown&space;I(x(p),y(p))&space;|^2&space;dp" target="_blank"><img src="https://latex.codecogs.com/gif.latex?E&space;=&space;\alpha&space;\int_{0}^{1}&space;|C'(p)|^2&space;dp&space;&plus;&space;\beta&space;\int_{0}^{1}&space;|C''(p)|^2&space;dp-&space;\lambda&space;\int_{0}^{1}&space;|\bigtriangledown&space;I(x(p),y(p))&space;|^2&space;dp" title="E = \alpha \int_{0}^{1} |C'(p)|^2 dp + \beta \int_{0}^{1} |C''(p)|^2 dp- \lambda \int_{0}^{1} |\bigtriangledown I(x(p),y(p)) |^2 dp" /></a>
+
+<br>
+où <a href="https://www.codecogs.com/eqnedit.php?latex=\alpha&space;,\beta&space;et&space;\lambda" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\alpha&space;,\beta&space;et&space;\lambda" title="\alpha ,\beta et \lambda" /></a> sont des constantes positives. Les deux premi&egrave;res constantes une contrainte interne au contour. Ce sont des termes de r&eacute;gularisation du contour qui d&eacute;terminent son &eacute;lasticit&eacute; et sa rigidit&eacute;. Alors, la minimisation de ces termes rend le contour plus pr&eacute;cis et propre. D'autre part, la derni&egrave;re constante est le terme de liaison aux donn&eacute;es. Elle dirige le contour vers les zones de plus forts gradients de l'image et donc les r&eacute;gions plus probables d'être des contours. Sa minimisation est donc un d&eacute;tecteur de fronti&egrave;res. En effet, l'&eacute;nergie est repr&eacute;sent&eacute; implicitement en ligne de niveaux puisque la courbe &eacute;volue au cours des it&eacute;rations. On dit que <a href="https://www.codecogs.com/eqnedit.php?latex=\phi" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\phi" title="\phi" /></a> est la fonction de ligne de niveaux tel que <a href="https://www.codecogs.com/eqnedit.php?latex=\phi&space;(x,y):&space;R^2&space;\rightarrow&space;R" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\phi&space;(x,y):&space;R^2&space;\rightarrow&space;R" title="\phi (x,y): R^2 \rightarrow R" /></a> repr&eacute;sente la courbe C selon le r&eacute;f&eacute;rentiel suivant: <a href="https://www.codecogs.com/eqnedit.php?latex=C&space;=&space;{(x,y):&space;\phi&space;(x,y)&space;=&space;0}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?C&space;=&space;{(x,y):&space;\phi&space;(x,y)&space;=&space;0}" title="C = {(x,y): \phi (x,y) = 0}" /></a> de façon que la courbe est interpr&eacute;t&eacute;e dans la direction normale à partir d'une vitesse impos&eacute;e par la force d'&eacute;nergie. Il revient donc à r&eacute;soudre l'&eacute;quation diff&eacute;rentielle suivante:
+<br>
+<a href="https://www.codecogs.com/eqnedit.php?latex=\frac{\partial&space;\phi}{\partial&space;t}&space;=&space;|\bigtriangledown&space;\phi|F,&space;\phi(0,x,y)&space;=&space;\phi&space;_0&space;(x,y)" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\frac{\partial&space;\phi}{\partial&space;t}&space;=&space;|\bigtriangledown&space;\phi|F,&space;\phi(0,x,y)&space;=&space;\phi&space;_0&space;(x,y)" title="\frac{\partial \phi}{\partial t} = |\bigtriangledown \phi|F, \phi(0,x,y) = \phi _0 (x,y)" /></a>
+<br>
+
+où <a href="https://www.codecogs.com/eqnedit.php?latex=\phi&space;_0&space;(x,y)" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\phi&space;_0&space;(x,y)" title="\phi _0 (x,y)" /></a> d&eacute;finit le contour initial.
+
+Selon [CHANG] cette formulation permet d'impl&eacute;menter l'&eacute;volution de la courbe dans les coordonn&eacute;es bidimensionnelles initiales. De plus, la convergence de la ligne de niveaux est obtenue à partir des contraintes d&eacute;riv&eacute;es de l'image. On identifie donc les fronti&egrave;res de contour par le contour active. À partir de ce mod&egrave;le, la ligne de niveaux sous-contrainte du gradient est mod&eacute;lis&eacute;e comme:
+<br>
+<a href="https://www.codecogs.com/eqnedit.php?latex=\frac{\partial&space;\phi}{\partial&space;t}&space;=&space;g(|\bigtriangledown&space;I|)|\bigtriangledown&space;\phi|&space;F" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\frac{\partial&space;\phi}{\partial&space;t}&space;=&space;g(|\bigtriangledown&space;I|)|\bigtriangledown&space;\phi|&space;F" title="\frac{\partial \phi}{\partial t} = g(|\bigtriangledown I|)|\bigtriangledown \phi| F" /></a>
+<br>
+
+À partir de cette technique on s'inspire de l'article [CHANG] afin de mettre en place le mod&egrave;le dont la ligne de niveaux sera en fonction de la coloration de la peau. Normalement, en espace RGB, la coloration de la peau humaine admettre un mod&egrave;le particulier et par cons&eacute;quent fournit un outil fiable de d&eacute;tection de visages, quand la luminance n'est pas prise en compte. Pour supprimer la luminance de la repr&eacute;sentation RGB, on doit diviser toutes les composantes de couleur des pixels (R,G,B) par l'intensit&eacute;. Ce nouveau espace de couleur est appel&eacute;e de Coloration Chromatique et propose la neutralisation de l'intensit&eacute; selon des vecteur de couleur en deux composantes (r,g). 
+
+
+<br>La coloration du visage est donc clust&eacute;ris&eacute;e dans la r&eacute;gion de la coloration chromatique. Elle sera repr&eacute;sent&eacute;e par une approximation de la distribution gaussienne en 2D <a href="https://www.codecogs.com/eqnedit.php?latex=N(m,\sum&space;))" target="_blank"><img src="https://latex.codecogs.com/gif.latex?N(m,\sum&space;))" title="N(m,\sum )" /></a> où <a href="https://www.codecogs.com/eqnedit.php?latex=m&space;=&space;(\bar&space;r&space;,\bar&space;g)" target="_blank"><img src="https://latex.codecogs.com/gif.latex?m&space;=&space;(\bar&space;r&space;,\bar&space;g)" title="m = (\bar r ,\bar g)" /></a>. <br>
+
+Les nouvelles composantes de travail selon la coloration seront: <br>
+
+<a href="https://www.codecogs.com/eqnedit.php?latex=\small&space;r&space;=&space;\frac{R}{R&plus;G&plus;B},&space;g&space;=&space;\frac{G}{R&plus;G&plus;B},&space;\bar&space;r&space;=&space;\frac{1}{S}\sum_{i=1}^S&space;r_i,&space;\bar&space;g&space;=&space;\frac{1}{S}\sum_{i=1}^S&space;g_i,&space;\sum&space;=&space;\begin{bmatrix}&space;\sigma&space;_r^2&space;&&space;\rho&space;_{X,Y}\sigma&space;_g&space;\sigma&space;_r&space;\\&space;\rho&space;_{X,Y}\sigma&space;_r&space;\sigma&space;_g&space;&&space;\sigma&space;_g^2&space;\end{bmatrix}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\small&space;r&space;=&space;\frac{R}{R&plus;G&plus;B},&space;g&space;=&space;\frac{G}{R&plus;G&plus;B},&space;\bar&space;r&space;=&space;\frac{1}{S}\sum_{i=1}^S&space;r_i,&space;\bar&space;g&space;=&space;\frac{1}{S}\sum_{i=1}^S&space;g_i,&space;\sum&space;=&space;\begin{bmatrix}&space;\sigma&space;_r^2&space;&&space;\rho&space;_{X,Y}\sigma&space;_g&space;\sigma&space;_r&space;\\&space;\rho&space;_{X,Y}\sigma&space;_r&space;\sigma&space;_g&space;&&space;\sigma&space;_g^2&space;\end{bmatrix}" title="\small r = \frac{R}{R+G+B}, g = \frac{G}{R+G+B}, \bar r = \frac{1}{S}\sum_{i=1}^S r_i, \bar g = \frac{1}{S}\sum_{i=1}^S g_i, \sum = \begin{bmatrix} \sigma _r^2 & \rho _{X,Y}\sigma _g \sigma _r \\ \rho _{X,Y}\sigma _r \sigma _g & \sigma _g^2 \end{bmatrix}" /></a>
+<br>
+La fonction d'&eacute;nergie selon des param&egrave;tres propos&eacute;s pour le mod&egrave;le de contour active est donn&eacute;e sur la forme:
+<br> 
+<a href="https://www.codecogs.com/eqnedit.php?latex=\small&space;E(\bar&space;r,&space;\bar&space;g,&space;c,&space;C)&space;=&space;\mu&space;\cdot&space;Longueur(C)&plus;v&space;\cdot&space;Area(interieur(C))&space;&plus;&space;\lambda&space;_1&space;\int&space;_{interieur(C)}&space;(|\bar&space;r&space;-r(x,y)|^2&space;&plus;&space;|\bar&space;g&space;-g(x,y)|^2)dxdy&space;&plus;&space;\lambda&space;_2&space;\int&space;_{exterieur(C)}&space;|Ix(x,y)-c|^2&space;dxdy" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\small&space;E(\bar&space;r,&space;\bar&space;g,&space;c,&space;C)&space;=&space;\mu&space;\cdot&space;Longueur(C)&plus;v&space;\cdot&space;Area(interieur(C))&space;&plus;&space;\lambda&space;_1&space;\int&space;_{interieur(C)}&space;(|\bar&space;r&space;-r(x,y)|^2&space;&plus;&space;|\bar&space;g&space;-g(x,y)|^2)dxdy&space;&plus;&space;\lambda&space;_2&space;\int&space;_{exterieur(C)}&space;|Ix(x,y)-c|^2&space;dxdy" title="\small E(\bar r, \bar g, c, C) = \mu \cdot Longueur(C)+v \cdot Area(interieur(C)) + \lambda _1 \int _{interieur(C)} (|\bar r -r(x,y)|^2 + |\bar g -g(x,y)|^2)dxdy + \lambda _2 \int _{exterieur(C)} |Ix(x,y)-c|^2 dxdy" /></a> (4)
+<br>
+où <a href="https://www.codecogs.com/eqnedit.php?latex=\small&space;\mu,&space;\nu,&space;\lambda_1,&space;\lambda_2" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\small&space;\mu,&space;\nu,&space;\lambda_1,&space;\lambda_2" title="\small \mu, \nu, \lambda_1, \lambda_2" /></a> sont des constantes, c est la moyenne de I à l'ext&eacute;rieur de C, et efin int&eacute;rieur(C) et ext&eacute;rieur(C) sont les r&eacute;gions à l'int&eacute;rieur et à l'ext&eacute;rieur du contour, respectivement. <br>
+
+On note donc le contour repr&eacute;sent&eacute; par la ligne de niveau 0 selon la fonction de ligne de niveaux <a href="https://www.codecogs.com/eqnedit.php?latex=\small&space;\phi" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\small&space;\phi" title="\small \phi" /></a> qui respecte à la distribution suivante: <br>
+
+<a href="https://www.codecogs.com/eqnedit.php?latex=\small&space;\left\{\begin{matrix}&space;C&space;=&space;{(x,y):\phi(x,y)=0}\\&space;interieur(C)&space;={(x,y):\phi(x,y)&space;>&space;0}&space;\\&space;exterieur(C)&space;={(x,y):\phi(x,y)&space;<&space;0}&space;\end{matrix}\right." target="_blank"><img src="https://latex.codecogs.com/gif.latex?\small&space;\left\{\begin{matrix}&space;C&space;=&space;{(x,y):\phi(x,y)=0}\\&space;interieur(C)&space;={(x,y):\phi(x,y)&space;>&space;0}&space;\\&space;exterieur(C)&space;={(x,y):\phi(x,y)&space;<&space;0}&space;\end{matrix}\right." title="\small \left\{\begin{matrix} C = {(x,y):\phi(x,y)=0}\\ interieur(C) ={(x,y):\phi(x,y) > 0} \\ exterieur(C) ={(x,y):\phi(x,y) < 0} \end{matrix}\right." /></a> <br>
+
+L'&eacute;nergie peut donc être repr&eacute;sent&eacute;e comme une formulation donc le contour peut être remplac&eacute; par la ligne de niveaux <a href="https://www.codecogs.com/eqnedit.php?latex=\small&space;\phi" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\small&space;\phi" title="\small \phi" /></a>. Si on remplace C par <a href="https://www.codecogs.com/eqnedit.php?latex=\small&space;\phi" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\small&space;\phi" title="\small \phi" /></a> en (4) et en suite on calcule l’&eacute;quation d'Euler-Lagrange, on obtient donc: <br>
+
+<a href="https://www.codecogs.com/eqnedit.php?latex=\frac{\partial&space;\phi}{\partial&space;t}&space;\equiv&space;\mu&space;\cdot&space;div(\frac{\bigtriangledown&space;\phi}{|\bigtriangledown&space;\phi|})&space;-&space;\nu&space;-&space;\lambda&space;_1{(\bar&space;r&space;-&space;r)^2&space;&plus;&space;(\bar&space;g&space;-&space;g)^2}&space;&plus;&space;\lambda&space;_2&space;(I-c)^2" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\frac{\partial&space;\phi}{\partial&space;t}&space;\equiv&space;\mu&space;\cdot&space;div(\frac{\bigtriangledown&space;\phi}{|\bigtriangledown&space;\phi|})&space;-&space;\nu&space;-&space;\lambda&space;_1{(\bar&space;r&space;-&space;r)^2&space;&plus;&space;(\bar&space;g&space;-&space;g)^2}&space;&plus;&space;\lambda&space;_2&space;(I-c)^2" title="\frac{\partial \phi}{\partial t} \equiv \mu \cdot div(\frac{\bigtriangledown \phi}{|\bigtriangledown \phi|}) - \nu - \lambda _1{(\bar r - r)^2 + (\bar g - g)^2} + \lambda _2 (I-c)^2" /></a> <br>
+
+où <a href="https://www.codecogs.com/eqnedit.php?latex=div(\bigtriangledown&space;\phi&space;/|\bigtriangledown&space;\phi|)" target="_blank"><img src="https://latex.codecogs.com/gif.latex?div(\bigtriangledown&space;\phi&space;/|\bigtriangledown&space;\phi|)" title="div(\bigtriangledown \phi /|\bigtriangledown \phi|)" /></a> est la courbure de la ligne de niveaux. À partir du voisinage de la ligne de niveaux, on note la courbure comme: <br>
+<a href="https://www.codecogs.com/eqnedit.php?latex=div(\frac{\bigtriangledown&space;\phi}{|\bigtriangledown&space;\phi|})&space;=&space;\frac{\phi_{xx}\phi_y^2&space;-&space;2\phi_x\phi_y\phi_{xy}&plus;&space;\phi_{yy}\phi_x^2}{(\phi_x^2&space;&plus;&space;\phi_y^2)^{3/2}}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?div(\frac{\bigtriangledown&space;\phi}{|\bigtriangledown&space;\phi|})&space;=&space;\frac{\phi_{xx}\phi_y^2&space;-&space;2\phi_x\phi_y\phi_{xy}&plus;&space;\phi_{yy}\phi_x^2}{(\phi_x^2&space;&plus;&space;\phi_y^2)^{3/2}}" title="div(\frac{\bigtriangledown \phi}{|\bigtriangledown \phi|}) = \frac{\phi_{xx}\phi_y^2 - 2\phi_x\phi_y\phi_{xy}+ \phi_{yy}\phi_x^2}{(\phi_x^2 + \phi_y^2)^{3/2}}" /></a>. <br>
+
+
+<!-- Eu esqueci a palavra que o prof usa para dizer que o contorno fica mais certinho -->
+
+
+<!-- Pr&eacute;sentation de la m&eacute;thode utilis&eacute;e et r&eacute;f&eacute;rence aux travaux connexes (cf. biblio article)<br> -->
+
+<br>
+
+<h2 class="soustitrearticle"> Impl&eacute;mentation</h2>
+<!--
+D&eacute;tails de l'impl&eacute;mentation (sous CImg)
+-->
+
+<p>La mise en oeuvre de ce travail a &eacute;t&eacute; fait dans la machine <strong>Berzet&nbsp;</strong>en utilisant le biblioth&egrave;que <strong>CImg&nbsp;</strong>qu&#39;a &eacute;t&eacute; propos&eacute;e par l&#39;enseignant &nbsp;pendant le cours d&#39;Algorithms for Image Processing dans le cadre d&#39;Ing&eacute;nieur Informatique de l&#39;ISIMA. &nbsp;Ce projet est &eacute;galement disponible dans le GitHub &nbsp;(<a href="https://goo.gl/qTDxar" rel="noopener noreferrer" target="_blank">https://goo.gl/qTDxar</a> ).</p>
+<hr>
+
+<ol>
+  <li><strong><u>L&#39;structure du projet:</u></strong>
+
+    <ul>
+      <li><span style="color: rgb(184, 49, 47);"><strong>/ &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span style="color: rgb(184, 49, 47);"><strong>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;</strong></span>&nbsp; &nbsp; &nbsp;&nbsp;</strong>&nbsp;</span><span style="color: rgb(124, 112, 107);">//Dossier racine du projet</span>
+
+        <ul>
+          <li><span style="color: rgb(184, 49, 47);"><strong>Images/ &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<span style="color: rgb(184, 49, 47);"><strong>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;</strong></span>&nbsp; &nbsp; &nbsp; &nbsp;</strong><span style="color: rgb(124, 112, 107);">//Dossier d'images</span></span>
+
+            <ul>
+              <li><span style="color: rgb(184, 49, 47);"><strong>testes/ <span style="color: rgb(184, 49, 47);"><strong>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;</strong></span>&nbsp; &nbsp; &nbsp; &nbsp;&nbsp;</strong>&nbsp; <span style="color: rgb(124, 112, 107);">//Images de test</span></span>
+              </li>
+            </ul>
+          </li>
+          <li><strong><span style="color: rgb(184, 49, 47);">output/ &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<span style="color: rgb(184, 49, 47);"><strong>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;</strong></span>&nbsp; &nbsp; &nbsp; &nbsp;&nbsp;</span>&nbsp;</strong><span style="color: rgb(184, 49, 47);">&nbsp;<span style="color: rgb(124, 112, 107);">//Dossier avec les r&eacute;sultats obtenus</span></span>
+          </li>
+          <li><span style="color: rgb(184, 49, 47);"><strong>Rapport/ &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;</strong> <span style="color: rgb(124, 112, 107);">//Dossier que contient ce pr&eacute;sent rapport</span></span>
+
+            <ul>
+              <li><span style="color: rgb(41, 105, 176);">template.html &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span style="color: rgb(124, 112, 107);">//Rapport (Il faut l&#39;ouvrir avec un navigateur web)</span></span>
+              </li>
+            </ul>
+          </li>
+          <li><span style="color: rgb(41, 105, 176);">main.cpp<span style="color: rgb(184, 49, 47);"><strong>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp;</strong> <span style="color: rgb(41, 105, 176);"><span style="color: rgb(124, 112, 107);">//Fichier que contient le code du projet</span></span>&nbsp;</span>&nbsp;</span>
+          </li>
+          <li><span style="color: rgb(41, 105, 176);">Makefile &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp;</span></li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li><strong><u>Compilation</u></strong>
+
+    <ul>
+      <li>Pour compiler ce projet il faut seulement ex&eacute;cuter le commande &quot;make&quot; dans le dossier racine du projet. On utilise d&#39;abord la machine berzet.</li>
+    </ul>
+  </li>
+  <li><strong><u>Ex&eacute;cution</u></strong>
+
+    <ul>
+      <li>Pour ex&eacute;cuter ce projet il faut informer l&#39;image dans le premier param&egrave;tre comme dans l&#39;exemple suivant:
+
+        <ul>
+          <li><strong><span style="color: rgb(147, 101, 184);">$</span> ./finalTP <span style="color: rgb(184, 49, 47);">NOME_IMAGE</span></strong></li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li><span style="color: rgb(0, 0, 0);"><u><strong>D&eacute;finitions de base</strong></u></span>
+
+    <ul>
+      <li><span style="color: rgb(184, 49, 47);"><span style="color: rgb(0, 0, 0);">Dans cet projet nous avons fait quelques d&eacute;finitions. La premi&egrave;re est li&eacute;e &agrave; le contour de d&eacute;but. Nous utilisons un circle de rayon &eacute;gale &agrave; taille de l&#39;image divis&eacute;e par 2 et avec le point d&#39;origine dans le centre de l&#39;Image.</span></span>
+      </li>
+      <li>On a chang&eacute; l&#39;initialisation du LevelSet (ligne de niveaux) pour &ecirc;tre l&#39;inverse de l&#39;initialization que nous avons fait dans le cours. Cette modification &eacute;tait n&eacute;cessaire parce que toutes les d&eacute;finitions que nous avons utilis&eacute;e sont l&#39;inverse des que sont pr&eacute;sent&eacute;es dans l&#39;artice.</li>
+    </ul>
+  </li>
+  <li><strong><u>Codage</u></strong>
+
+    <ol>
+      <li>D&#39;abord les fonctions <span style="color: rgb(85, 57, 130);"><strong>ExtractContour()</strong></span><span style="color: rgb(0, 0, 0);">,&nbsp;</span><span style="color: rgb(85, 57, 130);"><strong>DrawContour()&nbsp;</strong></span><span style="color: rgb(0, 0, 0);">et</span><span style="color: rgb(85, 57, 130);"><strong>&nbsp;InitLevelSet()&nbsp;</strong></span><span style="color: rgb(0, 0, 0);">sont les m&ecirc;mes que nous avons utilis&eacute; dans le projet. Le travail principal &eacute;tait modifier la fonction de propagation </span><span style="color: rgb(85, 57, 130);"><strong>Propagate()</strong></span><span style="color: rgb(0, 0, 0);">. Dans cette fonction nous d&eacute;finissions quelques parametres pour le mod&egrave;le, nous calculons la constante C d&eacute;finie ci-dessous et nous r&eacute;alisons la propagation du LevelSet.</span></li>
+    </ol>
+  </li>
+</ol>
+<hr>
+
+<p>&nbsp;</p>
+
+<p>
+  <br>
+</p>
+
+<br>
+<br>
+<h1 class="titrearticle"> R&eacute;sultats</h1>
+
+
+<h2 class="soustitrearticle"> Validation sur donn&eacute;es de synth&egrave;se</h2>
+<!--
+Vous devez cr&eacute;er des donn&eacute;es de synth&egrave;se pour &eacute;valuer votre m&eacute;thode
+-->
+Dans un premier temps, on &eacute;value le fonctionnement de l'algorithme pour l'identification du contour de formes g&eacute;ometriques color&eacute;es à l'aide du mod&egrave;le de coloration de la peau. Les images synth&egrave;tis&eacute;es sont sont plus rapidement contourn&eacute;es. Àpres 5 mises à jour du calcul, le contour des r&eacute;gions en coloration de la peau est obtenu. Voici deux mod&egrave;les obtenus avec les param&egrave;tres <a href="https://www.codecogs.com/eqnedit.php?latex=\lambda_1&space;=&space;0.1,&space;\lambda_2&space;=&space;0.4,&space;\mu&space;=&space;1" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\lambda_1&space;=&space;0.1,&space;\lambda_2&space;=&space;0.4,&space;\mu&space;=&space;1" title="\lambda_1 = 0.01, \lambda_2 = 0.02, \mu = 0.5" /></a>
+
+
+<figure>
+    <img src="img2.png" alt="Premi&egrave;re image synth&egrave;tis&eacute;e" />
+    <figcaption><strong>Fig 1</strong> &eacute;volution de l'algorithme par une image synth&egrave;tis&eacute;e dont les &eacute;toiles sont color&eacute;es par une couleur de peau</figcaption>
+</figure>
+
+<figure>
+    <img src="img1.png" alt="Deuxi&egrave;me image synth&egrave;tis&eacute;e" />
+    <figcaption><strong>Fig 2</strong> &eacute;volution de l'algorithme par une image synth&egrave;tis&eacute;e dont les cercles sont color&eacute;es par une couleur de peau</figcaption>
+</figure>
+
+<br>
+
+On note que l'algorithme propos&eacute; calcule le contour en fonction de la coloration de la peau et que les r&eacute;sultats obtenus sont tr&egrave;s pr&eacute;cis pour les images synth&egrave;tis&eacute;es. 
+
+<br>
+<br>
+<h2 class="soustitrearticle"> Donn&eacute;es r&eacute;elles</h2>
+<!--
+Une fois la m&eacute;thode &eacute;valu&eacute;e, vous appliquerez votre m&eacute;thode sur des images r&eacute;elles
+-->
+Apr&egrave;s la validation du fonctionement du mod&egrave;le à partir des images synth&egrave;tis&eacute;es, on &eacute;value le fonctionnement de l'algorithme pour l'identification des visages. On pr&eacute;sent&eacute; quelques r&eacute;sultats dont les images sont obtenues à chaque 100 it&eacute;rations de calcul.
+
+<figure>
+    <img src="img3.png" alt="Premi&egrave;re image r&eacute;elle" />
+    <figcaption><strong>Fig 3 </strong>&eacute;volution du mod&egrave;le propos&eacute;e dont <a href="https://www.codecogs.com/eqnedit.php?latex=\lambda_1&space;=&space;0.1,&space;\lambda_2&space;=&space;0.4,&space;\mu&space;=&space;1" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\lambda_1&space;=&space;0.1,&space;\lambda_2&space;=&space;0.4,&space;\mu&space;=&space;1" title="\lambda_1 = 0.1, \lambda_2 = 0.4, \mu = 1" /></a> </figcaption>
+</figure>
+
+<figure>
+    <img src="img4.png" alt="Premi&egrave;re image synth&egrave;tis&eacute;e" />
+    <figcaption><strong>Fig 4 </strong>&eacute;volution du mod&egrave;le propos&eacute;e dont <a href="https://www.codecogs.com/eqnedit.php?latex=\lambda_1&space;=&space;0.1,&space;\lambda_2&space;=&space;0.4,&space;\mu&space;=&space;1" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\lambda_1&space;=&space;0.1,&space;\lambda_2&space;=&space;0.4,&space;\mu&space;=&space;1" title="\lambda_1 = 0.5, \lambda_2 = 1.2, \mu = 0.5" /></a></figcaption>
+</figure>
+
+<figure>
+    <img src="img6.png" alt="Premi&egrave;re image synth&egrave;tis&eacute;e" />
+    <figcaption><strong>Fig 5 </strong>&eacute;volution du mod&egrave;le propos&eacute;e dont <a href="https://www.codecogs.com/eqnedit.php?latex=\lambda_1&space;=&space;0.1,&space;\lambda_2&space;=&space;0.4,&space;\mu&space;=&space;1" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\lambda_1&space;=&space;0.1,&space;\lambda_2&space;=&space;0.4,&space;\mu&space;=&space;1" title="\lambda_1 = 0.1, \lambda_2 = 0.3, \mu = 1" /></a></figcaption>
+</figure>
+
+
+<br>
+On note que pour chaque image, il faut r&eacute;guler les param&egrave;tres afin d'ajuster la convergence du calcul du contour. De plus, bien que l'intensit&eacute; soit normalis&eacute;e pour la param&eacute;trisation de l'image, on note sont influence dans le calcul, ce qui perturbe l'identification du contour dans des r&eacute;gions dont la coloration soit tr&egrave;s similaire à la coloration de la peau humaine ou qui ait une tr&egrave;s grande variation du gradient de l'image.
+<br>
+<br>
+
+<h1 class="titrearticle"> Discussion</h1>
+<!--
+Commentez vos r&eacute;sultats (d'un point de vue qualitatif <span style="font-weight: bold;">ET</span> quantitatif)
+-->
+<h2 class="soustitrearticle"> La pr&eacute;cision des r&eacute;sultats</h2>
+Le calcul du contour actif à partir de la ligne de niveaux selon la coloration de la peau est suffisamment pr&eacute;cis pour l'identification des visages. En fait, pour les formes g&eacute;om&eacute;triques color&eacute;es par le mod&egrave;le de coloration de la peau humaine, le mod&egrave;le est extrêmement efficace et la convergence du calcul est rapide. Dans une limite de 10 it&eacute;rations, normalement le calcul fournit le contour exact de la forme d'int&eacute;rêt. Quand on analyse les photos, l'intensit&eacute; et luminance perturbent le calcul et donc plus d'it&eacute;rations sont n&eacute;cessaires pour la convergence du calcul. On note que normalement, quelques centaines d'it&eacute;rations sont requises pour la pr&eacute;cision du calcul. 
+<br>
+On note que les param&egrave;tres ne sont pas d&eacute;terminants pour la pr&eacute;cision du calcul par des images synth&eacute;tis&eacute;es, alors on d&eacute;finit un param&eacute;trage d&eacute;faut qui fournira des contours pr&eacute;cis pour ce type d'image en g&eacute;n&eacute;ral. D'autre part, les param&egrave;tres doivent être adapt&eacute;s pour fournir la plus grande pr&eacute;cision du calcul du contour sur des images r&eacute;elles puisqu'ils doivent contrôler le calcul en minimisant les perturbations ext&eacute;rieures aux facteurs de calcul. De plus, les constantes de rigidit&eacute; et de liaison des donn&eacute;es du calcul doivent être synchronis&eacute;es afin d'obtenir la convergence. Si le r&eacute;glage n'&eacute;tablit pas une relation correcte entre ces constantes, donc le calcul divergera.
+<br>
+Ainsi bien comme l'article r&eacute;f&eacute;rence, l'algorithme identifie plusieurs visages sur une même photo. En fait, le contour initial est partitionn&eacute; lorsque diff&eacute;rentes r&eacute;gions d'int&eacute;rêt sont identifi&eacute;es et le calcul est fait par les diff&eacute;rentes partitions jusqu'à la convergence vers les fronti&egrave;res des visages.
+<br>
+On note que les r&eacute;gions dans le visage qui n'est pas de la peau ont des fronti&egrave;res &eacute;galement identifi&eacute;es, comme les sourcils, la bouche, la barbe. De plus, quelques contours plus sombr&eacute;s du visage sont &eacute;galement identifi&eacute;s.
+<br>
+<br>
+
+<h2 class="soustitrearticle"> Limites de l'algorithme</h2>
+
+Cette approche est limit&eacute;e par plusieurs inconv&eacute;nients. On liste ceux qui sont les plus &eacute;vidents: <br>
+
+<ol>
+      <li>La reconnaissance requiert la bonne initialisation des param&egrave;tres aussi bien que le bon positionnement du contour initial. C'est-à-dire que l'&eacute;nergie sur la courbe est d&eacute;pendante de la param&eacute;trisation du contour.</li>
+      <li>La convergence est obtenue seulement par des fronti&egrave;res non-concaves de l'objet d'int&eacute;rêt quand la contrainte de r&eacute;gularit&eacute; est tr&egrave;s significative par ce mod&egrave;le. Alors le r&eacute;sultat sera soit la divergence du calcul ou une tr&egrave;s &eacute;lev&eacute;e perturbation des r&eacute;sultats.</li>
+      <li>La constante de rigidit&eacute; entraîne des perturbations du calcul.</li>
+</ol>
+
+<br>
+<br>
+<h1 class="titrearticle"> Conclusion</h1>
+
+On a propos&eacute; une impl&eacute;mentation en CImg du mod&egrave;le de contour active pour l'identification de visages dans une image fournie. Pour cela, on repr&eacute;sente la ligne de niveaux de la force d'&eacute;nergie du contour à partir du mod&egrave;le de coloration de la peau humaine. On visait l'identification des visages à partir de la d&eacute;tection des fronti&egrave;res de la peau dans la r&eacute;gion du visage. Les r&eacute;sultats sont satisfaisantes, pr&eacute;cis et extensibles à l'identification de plusieurs visages dans le même traitement. 
+
+<h1 class="titrearticle"> R&eacute;f&eacute;rences</h1>
+
+[CHANG] Jae-Sik Chang1, Mu-Youl Lee1 , Chae-Hyun Moon1, Hye-Sun Park1, Kyung-Mi Lee2, Hang-Joon Kim. "Face detection using active contours"  <br>
+
+[KASS,1988] M. Michael Kass, Andrew Witkin, Demetri Terzopoulos. "Snakes : Active contour models". International Journal of Computer Vision, 1 :321?332, 1988 <br>
+
+[GASTAUD, 2005] Muriel Gastaud. "Mod&egrave;les de contours actifs pour la segmentation d’images et de vid&eacute;os". Automatique
+/ Robotique. Universit&eacute; Nice Sophia Antipolis, 2005. <br>
+
+
+
+
+</body>
+</html>
